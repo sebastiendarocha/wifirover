@@ -1,0 +1,44 @@
+
+
+config led 'led_usb'
+	option name 'USB'
+	option sysfs 'tp-link:green:usb'
+	option trigger 'usbdev'
+	option interval '50'
+	option dev '1-1'
+
+config led 'led_wlan'
+	option name 'WLAN'
+	option sysfs 'tp-link:green:wlan'
+	option trigger 'phy0tpt'
+
+config led 'led_wan'
+	option name 'WAN'
+	option sysfs 'tp-link:green:wan'
+	option trigger 'switch0'
+	option port_mask '0x20'
+
+config led 'led_lan1'
+	option name 'LAN1'
+	option sysfs 'tp-link:green:lan1'
+	option trigger 'switch0'
+	option port_mask '0x10'
+
+config led 'led_lan2'
+	option name 'LAN2'
+	option sysfs 'tp-link:green:lan2'
+	option trigger 'switch0'
+	option port_mask '0x08'
+
+config led 'led_lan3'
+	option name 'LAN3'
+	option sysfs 'tp-link:green:lan3'
+	option trigger 'switch0'
+	option port_mask '0x04'
+
+config led 'led_lan4'
+	option name 'LAN4'
+	option sysfs 'tp-link:green:lan4'
+	option trigger 'switch0'
+	option port_mask '0x02'
+

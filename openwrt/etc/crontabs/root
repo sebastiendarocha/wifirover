@@ -1,0 +1,4 @@
+* * * * * /sbin/disconnect.sh
+0 5 * * * /sbin/cleansinglesession.sh
+*/10 * * * * /sbin/watchdog.sh 
+0 4 * * * /sbin/purge_autowhitelist ; /sbin/regen_autowhitelist

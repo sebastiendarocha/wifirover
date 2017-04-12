@@ -1,0 +1,112 @@
+#!/bin/bash /etc/rc.common
+
+### BEGIN INIT INFO
+# Provides:          wifi_rover
+# Required-Start:    $network 
+# Required-Stop:     
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Wifirover Captive portal
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+START=99
+EXTRA_COMMANDS="restart status"
+
+#Getting config for debian
+source /etc/wifi_rover.conf
+if [ -f /etc/debian_version ]; then
+    ENV=debian;
+#Getting conf for openwrt
+else 
+    ENV=other;
+fi
+
+start() {
+    echo "Starting Wifi Rover Portal";
+    echo "`date +"%F %H:%M:%S"` Starting Wifi Rover Portal" >> $LOGFILE
+
+    /sbin/firewall -s
+    if [ -f /sbin/purge_autowhitelist ] ; then /sbin/purge_autowhitelist ; fi
+    if [ -f /sbin/regen_autowhitelist ] ; then /sbin/regen_autowhitelist; fi
+
+    # Activate routing
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+
+    # Custom rules in /etc/firewall.user
+    if [ -f /etc/firewall.user ]; then
+        /etc/firewall.user
+    fi
+
+    # Preparing logfile
+    touch $LOGFILE
+    if [ $ENV == debian ]; then
+        chown www-data:www-data $LOGFILE;
+    fi
+    echo "`date +"%F %H:%M:%S"` Wifi Rover Portal Started" >> $LOGFILE
+}
+
+stop() {
+    echo "Stopping Wifi Rover Portal";
+    echo "`date +"%F %H:%M:%S"` Stopping Wifi Rover Portal" >> $LOGFILE
+
+    /sbin/firewall -k
+
+    echo 0 > /proc/sys/net/ipv4/ip_forward
+
+    echo "`date +"%F %H:%M:%S"` Wifi Rover Portal Stopped" >> $LOGFILE
+}
+
+status() {
+    RS=0;
+    if [ `cat /proc/sys/net/ipv4/ip_forward` == 0 ]; then
+        echo "IPV4 forward Not OK";
+        ((RS++));
+    fi
+    if [ "`/sbin/firewall -r`" != "OK" ] ; then
+        echo "Iptables Rules don't match";
+        ((RS++));
+    fi
+    case "$RS" in
+        0)
+        if [ -z "$GTWNAME" ]; then
+            NUM=`grep -c . /tmp/dhcp.leases`;
+        else
+            NUM=`/sbin/firewall -c`;
+        fi
+        echo "WifiRover portal is running ($NUM)";
+        exit 0;
+        ;;
+        
+        2)
+        echo "WifiRover portal stopped";
+        exit 2;
+        ;;
+        *)
+        echo "WifiRover portal disrupted";
+        exit 1;
+        ;;
+    esac
+}
+
+case "$1" in
+    start)
+        start
+    ;;
+
+    stop)
+        stop
+    ;;
+
+    restart)
+        stop
+        start
+    ;;
+
+    status)
+        status
+    ;;
+
+    *)
+    #echo "Usage: $0 stop|start|restart|status";
+esac

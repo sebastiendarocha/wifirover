@@ -1,0 +1,4 @@
+
+
+WANIF=eth0.2;
+LANIF=br-lan;

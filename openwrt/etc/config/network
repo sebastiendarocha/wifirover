@@ -1,0 +1,6 @@
+config interface 'lan1'
+    option type 'bridge'
+    option proto 'static'
+    option ipaddr '172.16.0.1'
+    option netmask '255.255.254.0'
+

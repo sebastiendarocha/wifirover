@@ -1,0 +1,121 @@
+#!/bin/bash
+
+source /opt/vyatta/etc/functions/script-template
+
+case $1 in
+    get)
+
+    case $2 in
+        logger0)
+        run show configuration commands | grep "set system flow-accounting netflow server" | awk '{print $6}'
+        ;;
+
+        rflow_port)
+        run show configuration commands | grep "set system flow-accounting netflow server" | awk '{print $8}'
+        ;;
+
+        fprobe)
+        run show configuration commands | grep "set system flow-accounting netflow server" | awk '{print $6 ":" $8}'
+        ;;
+
+        hostname)
+        run show configuration commands | grep "set system host-name" | awk '{print $4}'
+        ;;
+
+        unifi0)
+        run show configuration commands | grep "set system static-host-mapping host-name unifi inet" | awk '{print $7}'
+        ;;
+
+        alias_borne)
+        run show configuration commands | grep "set system static-host-mapping host-name " | grep "$3" | awk '{print $5}'
+        ;;
+
+        dhcp_lease)
+        run show configuration commands | grep "set service dns forwarding options dhcp-range" | cut -d'=' -f2 | cut -d',' -f 3 | sed 's/h//'
+        ;;
+        dhcp_range_min)
+        run show configuration commands | grep "set service dns forwarding options dhcp-range" | cut -d'=' -f2 | cut -d',' -f 1
+        ;;
+        dhcp_range)
+        run show configuration commands | grep "set service dns forwarding options dhcp-range" | cut -d'=' -f2 | cut -d',' -f 2
+        ;;
+
+        *)
+        echo "$1: Unknown parameter"
+        ;;
+
+    esac
+    ;;
+
+    set)
+    if [ $2 != "unifi0" -a -z "$3" ] ; then echo "$0 $1 $2:  missing parameter" ; exit 1; fi
+
+    case $2 in
+        logger0)
+        rflow_port=$(/config/scripts/wifi_rover/config get rflow_port)
+        configure
+        delete system flow-accounting netflow server
+        set system flow-accounting netflow server $3 port $rflow_port
+        commit && save || exit 1
+        ;;
+
+        rflow_port)
+        logger0=$(/config/scripts/wifi_rover/config get logger0)
+        configure
+        set system flow-accounting netflow server $logger0 port $3 
+        commit && save || exit 1
+        ;;
+
+        hostname)
+        configure
+        set system host-name "$3"
+        commit && save || exit 1
+        ;;
+
+        unifi0)
+        if [ -n "$3" -a "0" != "$3" ] ; then
+            sed -i "s|^UNIFI=.*|UNIFI=$3|" /etc/wifi_rover.conf
+            configure
+            delete system static-host-mapping host-name unifi
+            set system static-host-mapping host-name unifi inet "$3"
+            commit && save || exit 1
+        else
+            sed -i "s|^UNIFI=.*|UNIFI=|" /etc/wifi_rover.conf
+            configure
+            delete system static-host-mapping host-name unifi
+            commit && save || exit 1
+        fi
+        ;;
+
+        alias_borne)
+        name=$(/config/scripts/wifi_rover/config get alias_borne $4)
+        configure
+        delete system static-host-mapping host-name $name
+        set system static-host-mapping host-name $3 inet "$4"
+        commit && save || exit 1
+        ;;
+
+        dhcp_lease)
+        if [ "$3" -gt 0 ] ; then
+            option_common=$(/config/scripts/wifi_rover/config get dhcp_range_min),$(/config/scripts/wifi_rover/config get dhcp_range)
+            option_old=$option_common,$(/config/scripts/wifi_rover/config get dhcp_lease)h
+            option_new=$option_common,${3}h
+            configure
+            delete service dns forwarding options dhcp-range=$option_old
+            set service dns forwarding options dhcp-range=$option_new
+            commit && save || exit 1
+        fi
+        ;;
+
+        *)
+        echo "$1: Unknown parameter"
+        ;;
+
+    esac
+    ;;
+
+    *)
+    echo "$1: Unknown command"
+    ;;
+esac
+

@@ -1,0 +1,22 @@
+/var/log/dnsmasq.log {
+	daily
+	missingok
+	rotate 3
+	compress
+	delaycompress
+	notifempty
+	postrotate
+		invoke-rc.d rsyslog rotate > /dev/null
+	endscript
+
+}
+
+/tmp/wr.log {
+  rotate 30
+  daily
+  compress
+  missingok
+  notifempty
+  su www-data
+}
+

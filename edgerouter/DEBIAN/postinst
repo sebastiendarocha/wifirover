@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Setting rights
+/bin/chown -R www-data:www-data /www
+/bin/chown root:root /etc/cron.d/wifi_rover
+/bin/chmod 0600 /etc/cron.d/wifi_rover
+/bin/chown -R root:root /etc/sudoers.d
+/bin/chmod 0440 /etc/sudoers.d/wifi_rover
+/bin/chown -R root:root /root/.ssh/
+/bin/chmod 0600 /root/.ssh/
+/bin/chmod 0755 /etc/watchdog.d/*
+/usr/sbin/update-rc.d lighttpd_ssl defaults

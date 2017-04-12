@@ -1,0 +1,30 @@
+#! /bin/bash
+key=$1
+value=$2
+force_empty=0;
+
+case $key in
+    CORPIF|LANIF|WANIF)
+        conf_file="/etc/interfaces.conf"
+        ;;
+    *)
+        conf_file="/etc/wifi_rover.conf"
+        ;;
+esac
+
+case $key in
+    CORPIF)
+        force_empty=1;
+        ;;
+esac
+
+echo $0 $1 $2 >> /tmp/log
+if [ -n "$value" -o $force_empty -eq 1 ] ; then
+    echo "$value" | grep -c " "
+# if there is a space in the value, inclose in double brackets
+    if [ "$?" -eq 0 ] ; then
+        sed -i "s|^$key=.*|$key=\"$value\";|" $conf_file
+    else
+        sed -i "s|^$key=.*|$key=$value;|" $conf_file
+    fi
+fi

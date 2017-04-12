@@ -1,0 +1,3 @@
+www-data ALL=NOPASSWD: /sbin/iptables,/etc/init.d/wifi_rover,/config/scripts/wifi_rover/config,/config/scripts/wifi_rover/config_wifi_rover,/sbin/ipset
+dnsmasq ALL=NOPASSWD: /sbin/iptables,/sbin/ipset
+

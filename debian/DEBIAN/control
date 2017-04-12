@@ -1,0 +1,10 @@
+Package: wifi-rover
+Version: 2017.04.3
+Section: base
+Priority: optional
+Architecture: all
+Pre-Depends: fprobe
+Depends: lighttpd, php5-cgi, dnsmasq, vim, sudo, dnsutils, openvpn, ipset, rsyslog-relp
+Replaces: fprobe,lighttpd,dnsmasq,sudo,php5-cgi,openssh-client
+Maintainer: Olivier FONTES <olivier@altsysnet.com>
+Description: Portail Wifi Rover
