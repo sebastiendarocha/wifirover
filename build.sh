@@ -1,12 +1,10 @@
 #/bin/bash
 # By Olivier FONTÈS <olivier@altsysnet.com>
-# This script has the purpose to build a portal version
+# This script has the purpose to build a wifirover version
 # For every architectures
-TMP=/tmp;
-DEB_PKGDIR=${TMP}/portal.pkg
 DPKGDEB="/usr/bin/dpkg-deb";
 RSYNC="/usr/bin/rsync -a";
-DEST=`cat common/etc/version_wr`
+DEST=build_`cat common/etc/version_wr`
 
 #Excluding .gitignore files
 EXCLUDE='--exclude=.git';
@@ -15,10 +13,29 @@ for i in `cat .gitignore`; do
 done
 
 # Cleaning tmp files
-rm -rf ${DEST} ${DEB_PKGDIR} ${TMP}/portal_edgerouter
+rm -rf ${DEST}
+
+echo "Generating Debian packages" > /dev/stderr
+# Export of Debian tree
+mkdir -p ${DEST}/wifirover_debian ${DEST}/wifirover_edgerouter
+
+# Mergin with common directory
+$RSYNC $EXCLUDE common/* ${DEST}/wifirover_debian
+# Adding OS specific files
+$RSYNC $EXCLUDE debian/* ${DEST}/wifirover_debian
+# Building debian package
+$DPKGDEB --build ${DEST}/wifirover_debian
 
 
-#Treating specifically config files regarding ARCH
+# Mergin with common directory
+$RSYNC $EXCLUDE common/* ${DEST}/wifirover_edgerouter
+# Adding OS specific files
+$RSYNC $EXCLUDE edgerouter/* ${DEST}/wifirover_edgerouter
+# Building EdgeOS package
+$DPKGDEB --build ${DEST}/wifirover_edgerouter
+
+
+echo "Generating LEDE package" > /dev/stderr
 
 # Creating tmp directory
 mkdir -p ${DEST}/ipk
@@ -28,23 +45,9 @@ $RSYNC $EXCLUDE common/* ${DEST}/ipk
 # Adding arch specific files
 $RSYNC $EXCLUDE openwrt/* ${DEST}/ipk
 
-echo "Generating Debian packages" > /dev/stderr
-# Export of Debian tree
-mkdir -p ${DEB_PKGDIR} ${TMP}/portal_edgerouter
+tar czf $DEST/data.tar.gz $DEST/ipk -C $DEST/ipk
 
-# Mergin with common directory
-$RSYNC $EXCLUDE common/* ${TMP}/portal_edgerouter
-# Adding OS specific files
-$RSYNC $EXCLUDE edgerouter/* ${TMP}/portal_edgerouter
-# Building debian package
-$DPKGDEB --build ${TMP}/portal_edgerouter
-
-cp -r /tmp/portal.pkg.deb /tmp/portal_edgerouter.deb $DEST
-
-
-echo "Generating LEDE package" > /dev/stderr
-
-cat > $DEST/control << EOF 
+cat > $DEST/control << EOF
 Package: wifirover
 Version: $(cat common/etc/version_wr)
 Description: WifiRover Captive portal
@@ -58,7 +61,6 @@ EOF
 
 tar czf $DEST/control.tar.gz $DEST/control -C $DEST/
 
-tar czf $DEST/data.tar.gz $DEST/ipk -C $DEST/ipk
 
 echo 2.0 > $DEST/debian-binary
 
