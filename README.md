@@ -2,7 +2,7 @@
 Captive portal project
 
 # Debian build
-The following packages are require:
+The following packages are required:
 * bzip2
 * git
 * make
