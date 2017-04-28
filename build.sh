@@ -11,9 +11,6 @@ DPKGDEB="/usr/bin/dpkg-deb";
 RSYNC="/usr/bin/rsync -a";
 DEST=`cat common/etc/version_wr`
 
-# Download image builders
-wget -c https://downloads.lede-project.org/releases/17.01.0/targets/ar71xx/generic/lede-imagebuilder-17.01.0-ar71xx-generic.Linux-x86_64.tar.xz
-
 #Excluding .gitignore files
 EXCLUDE='--exclude=.git';
 for i in `cat .gitignore`; do
