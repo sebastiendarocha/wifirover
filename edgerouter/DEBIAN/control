@@ -1,5 +1,5 @@
-Package: wifi-rover
-Version: 2017.04.3
+Package: wifirover
+Version: 2017-05-0
 Section: base
 Priority: optional
 Architecture: all
