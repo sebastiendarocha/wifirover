@@ -1,4 +1,0 @@
-config 'led' 'wlan_led'
-	option 'name' 'WLAN'
-	option 'sysfs' 'tl-wr1043nd:green:wlan'
-	option 'trigger' 'phy0rx'
