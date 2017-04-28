@@ -4,7 +4,6 @@
 /etc/default/cron
 /etc/firewall.user
 /etc/init.d/wifi_rover
-/etc/lighttpd/lighttpd.conf
 /etc/rc.local
 /etc/php5/cgi/php.ini
 /etc/sudoers.d/wifi_rover
