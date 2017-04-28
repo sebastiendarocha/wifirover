@@ -3,9 +3,6 @@
 # This script has the purpose to build a portal version
 # For every architectures
 TMP=/tmp;
-OWRT_CONFIGDIR=openwrt/etc/config;
-OWRT_ETCDIR=openwrt/etc;
-OWRT_BACKUPDIR=${TMP}/backup/openwrt.backup;
 DEB_PKGDIR=${TMP}/portal.pkg
 DPKGDEB="/usr/bin/dpkg-deb";
 RSYNC="/usr/bin/rsync -a";
