@@ -38,16 +38,16 @@ $DPKGDEB --build ${DEST}/wifirover_edgerouter
 echo "Generating LEDE package" > /dev/stderr
 
 # Creating tmp directory
-mkdir -p ${DEST}/ipk
+mkdir -p ${DEST}/lede/ipk
 
 # Mergin with common directory
-$RSYNC $EXCLUDE common/* ${DEST}/ipk
+$RSYNC $EXCLUDE common/* ${DEST}/lede/ipk
 # Adding arch specific files
-$RSYNC $EXCLUDE openwrt/* ${DEST}/ipk
+$RSYNC $EXCLUDE openwrt/* ${DEST}/lede/ipk
 
-tar czf $DEST/data.tar.gz $DEST/ipk -C $DEST/ipk
+tar czf $DEST/lede/data.tar.gz $DEST/lede/ipk -C $DEST/lede/ipk
 
-cat > $DEST/control << EOF
+cat > $DEST/lede/control << EOF
 Package: wifirover
 Version: $(cat common/etc/version_wr)
 Description: WifiRover Captive portal
@@ -59,11 +59,13 @@ Architecture: all
 OE: wifirover
 EOF
 
-tar czf $DEST/control.tar.gz -C $DEST/ control 
+tar czf $DEST/lede/control.tar.gz -C $DEST/lede/ control 
 
 
-echo 2.0 > $DEST/debian-binary
+echo 2.0 > $DEST/lede/debian-binary
 
-ar r $DEST/wifirover.ipk $DEST/control.tar.gz $DEST/data.tar.gz  $DEST/debian-binary > /dev/null
+ar r $DEST/lede/wifirover.ipk $DEST/lede/control.tar.gz $DEST/lede/data.tar.gz  $DEST/lede/debian-binary > /dev/null
 
-rm -rf $DEST/control.tar.gz $DEST/data.tar.gz $DEST/debian-binary $DEST/control $DEST/ipk
+
+
+rm -rf $DEST/lede/control.tar.gz $DEST/lede/data.tar.gz $DEST/lede/debian-binary $DEST/lede/control $DEST/lede/ipk
