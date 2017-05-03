@@ -59,7 +59,7 @@ Architecture: all
 OE: wifirover
 EOF
 
-tar czf $DEST/control.tar.gz $DEST/control -C $DEST/
+tar czf $DEST/control.tar.gz -C $DEST/ control 
 
 
 echo 2.0 > $DEST/debian-binary
