@@ -35,6 +35,9 @@ $RSYNC $EXCLUDE edgerouter/* ${DEST}/wifirover_edgerouter
 $DPKGDEB --build ${DEST}/wifirover_edgerouter
 
 
+rm -rf $DEST/wifirover_debian $DEST/wifirover_edgerouter
+
+
 echo "Generating LEDE package" > /dev/stderr
 
 # Creating tmp directory
@@ -45,7 +48,7 @@ $RSYNC $EXCLUDE common/* ${DEST}/lede/ipk
 # Adding arch specific files
 $RSYNC $EXCLUDE openwrt/* ${DEST}/lede/ipk
 
-tar czf $DEST/lede/data.tar.gz $DEST/lede/ipk -C $DEST/lede/ipk
+tar czf $DEST/lede/data.tar.gz -C $DEST/lede/ipk .
 
 cat > $DEST/lede/control << EOF
 Package: wifirover
@@ -57,15 +60,24 @@ Maintainer: Olivier Fontes <olivier@altsysnet.com>, Sebastien DA ROCHA <sebastie
 License: LGPL 2.1
 Architecture: all
 OE: wifirover
+Source: https://github.com/altsysnet/wifirover
+Depends: firewall, base-files, base-files, php7, dnsmasq-full
+Replaces: firewall, base-files, base-files, php7, dnsmasq-full
 EOF
 
-tar czf $DEST/lede/control.tar.gz -C $DEST/lede/ control 
+tar czf $DEST/lede/control.tar.gz -C $DEST/lede/ control
 
 
 echo 2.0 > $DEST/lede/debian-binary
 
-ar r $DEST/lede/wifirover.ipk $DEST/lede/control.tar.gz $DEST/lede/data.tar.gz  $DEST/lede/debian-binary > /dev/null
+tar czf $DEST/lede/wifirover.ipk -C $DEST/lede control.tar.gz data.tar.gz  debian-binary > /dev/null
 
-
+# Append info to Packages
+cat $DEST/lede/control >> $DEST/lede/Packages
+md5sum -b $DEST/lede/wifirover.ipk | awk '{ print "MD5Sum: " $1 }' >> $DEST/lede/Packages
+wc -c $DEST/lede/wifirover.ipk | awk '{ print "Size: " $1 }' >> $DEST/lede/Packages
+echo "Filename: wifirover.ipk" >> $DEST/lede/Packages
+echo "" >> $DEST/lede/Packages
 
 rm -rf $DEST/lede/control.tar.gz $DEST/lede/data.tar.gz $DEST/lede/debian-binary $DEST/lede/control $DEST/lede/ipk
+
