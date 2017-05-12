@@ -1,6 +1,6 @@
 <?php
 
-define( 'PLUGIN_DIR', '/opt/wifi_rover/lib/plugins/');
+define( 'PLUGIN_DIR', '/usr/share/php/plugins/');
 abstract class plugable {
     static $plugins = array();
 
