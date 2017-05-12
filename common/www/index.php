@@ -44,6 +44,7 @@ if (in_array($dest, $ignore)) {
     exit;
 }
 
+$gtw=GTW;
 $cf = '/etc/wifi_rover.conf';
 # redirect corporate
 $CORPORATENET = getValueFromConf($cf, 'CORPORATENET');
