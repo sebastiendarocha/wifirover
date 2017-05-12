@@ -1,5 +1,5 @@
 <?php
-include('../common.php');
+include('common.php');
 loadEnv();
 if (ADMINACTIVE==0) {
     header("Location: /");
