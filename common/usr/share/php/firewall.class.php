@@ -1,5 +1,5 @@
 <?php
-include_once("/www/common.php");
+include_once("common.php");
 include_once("firewall_plugin.class.php");
 include_once("plugable.class.php");
 
