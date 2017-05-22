@@ -15,7 +15,6 @@ abstract class plugable {
         }
     }
 
-    #static function addPlugin( plugin $obj)
     static function addPlugin( $obj)
     {
         if( !isset(self::$plugins[get_class($obj)]) )
@@ -41,6 +40,15 @@ abstract class plugable {
 
     static function call_plugin($plugin, $method, $args =array())
     {
-        return @self::$plugins[$plugin]->$method($args);
+		$class =  $this->getName();
+		$plugin_name = $class."_".strtolower($plugin);
+		if( isset(self::$plugins[$plugin_name]) )
+		{
+			return @self::$plugins[$plugin_name]->$method($args);
+		}
+		else
+		{
+			return @self::$plugins[$class."_default"]->$method($args);
+		}
     }
 }

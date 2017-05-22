@@ -12,7 +12,7 @@ class redirect extends plugable {
 
     function getUrlRedirect()
     {
-        return $this->call_plugin("redirect_default", "getUrlRedirect");
+        return $this->call_plugin( PORTALMODE, "getUrlRedirect");
     }
 
     function getName() { return __CLASS__; }
