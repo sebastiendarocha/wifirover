@@ -1,0 +1,30 @@
+#! /usr/bin/php-cgi -qC
+<?php
+include("/www/config.class.php");
+
+if( !(($argc == 3 and $argv[1] == "get") or ($argc == 4 and $argv[1] == "set") )) {
+    echo "usage : {$argv[0]} set|get parameter [value]";
+    exit (1);
+}
+
+$parameter = $argv[2];
+
+if( ! in_array( $parameter, array_keys($rule) )) {
+    echo "unknown parameter {$parameter}";
+    exit(2);
+}
+
+$conf = new Config;
+
+if( $argv[1] == "set")
+{
+    $value = $argv[3];
+    $err = $conf->set($parameter, $value);
+    exit($err);
+}
+else
+{
+    $result = $conf->get($parameter);
+    echo ($result['value']);
+    exit($result['err']);
+}

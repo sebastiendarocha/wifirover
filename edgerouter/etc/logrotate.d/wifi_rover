@@ -1,0 +1,10 @@
+
+/tmp/wr.log {
+  rotate 30
+  daily
+  compress
+  missingok
+  notifempty
+  su www-data
+}
+

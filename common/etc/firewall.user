@@ -1,0 +1,9 @@
+# Put here your custom rules
+# This script is executed when portal is started
+# Keep in mind that this scripts is executed after portal start
+
+# Example add whitelist from mac
+# iptables -t nat -I PREROUTING -m mac --mac xx:xx:xx:xx:xx:xx -j ACCEPT
+# iptables -I FORWARD -m mac --mac xx:xx:xx:xx:xx:xx -j ACCEPT
+
+

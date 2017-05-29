@@ -1,0 +1,7 @@
+#!/bin/bash
+YEAR=`date +%Y`
+if [[ $YEAR == 1970 ]]; then
+	logger wr_watchdog : restarting NTP 
+	/etc/init.d/sysntpd restart
+fi
+

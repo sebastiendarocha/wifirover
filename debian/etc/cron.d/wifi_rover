@@ -1,0 +1,3 @@
+* * * * * root /sbin/disconnect.sh
+0 5 * * * root /sbin/cleansinglesession.sh
+*/15 * * * * root /sbin/cloudrouters_checker.php

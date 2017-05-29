@@ -1,0 +1,136 @@
+#! /usr/bin/php-cgi -qC
+<?php
+include( 'connexion.class.php');
+
+$options = array( "start", "kill", "get-firewall-command", "synchronize", "disconnect","check",  "blackwhitelist", "checkrules");
+
+$option = getopt( "skgmdcbr", $options);
+
+foreach( $option as $key => $value)
+{
+    switch( $key) {
+    case 's': 
+        $start = 1;
+        break;
+    case 'k': 
+        $kill = 1;
+        break;
+    case 'g':
+        $get_fw_cmd = 1;
+        break;
+    case 'm':
+        $synchronize = 1;
+        break;
+    case 'd':
+        $disconnect = 1;
+        break;
+    case 'c':
+        $check = 1;
+        break;
+    case 'b':
+        $bwl = 1;
+        break;
+    case 'r':
+        $rules = 1;
+        break;
+    default:
+        print "error: unknown arg: $key";
+        break;
+    }
+}
+
+if( (isset($start) xor isset( $kill)) xor isset($get_fw_cmd) xor isset($synchronize)xor isset($disconnect) xor isset($check) xor isset($bwl) xor isset($rules)) 
+{
+    $args_correct = true;
+}
+else
+{
+    print "usage " . $argv[0] . " command ".PHP_EOL;
+    print "\tcommand:".PHP_EOL;
+    print "\t\t-s, --start            : start the wifi_rover firewall".PHP_EOL;
+    print "\t\t-k, --kill             : stop the wifi_rover firewall".PHP_EOL;
+    print "\t\t-g,".PHP_EOL;
+    print "\t\t--get-firewall-command : returns command to use iptable".PHP_EOL;
+    print "\t\t-m,--synchronize       : synchronize connexions with firewall".PHP_EOL;
+    print "\t\t-d,--disconnect        : disconnect users".PHP_EOL;
+    print "\t\t-c,--check             : check static rules".PHP_EOL;
+    print "\t\t-b,--blackwhitelist    : refresh whitelist and blacklist".PHP_EOL;
+    print "\t\t-r,--checkrules        : check firewall rules".PHP_EOL;
+    die();
+
+}
+
+$cx = new connexion();
+$fw = new firewall();
+
+if( isset($start))
+{
+    $fw->startFirewall();
+}
+
+
+if( isset($kill))
+{
+    $fw->stopFirewall();
+    $cx->clearConnexions();
+}
+
+
+if( isset($get_fw_cmd))
+{
+    echo $fw->getFirewallCommand();
+}
+
+if( isset($synchronize))
+{
+    // Get an array of connected user
+    $macs_connected = $cx->getConnectedUsers();
+
+    // Synchronise firewall on array
+    $fw->synchronizeConnexions( $macs_connected);
+}
+
+if( isset($disconnect))
+{
+    // Get an array of connected user
+    $macs_connected = $cx->disconnectUsers();
+    loadEnv();
+    foreach ($macs_connected as $mac => $ip)
+    {
+        sendToLog( "Expired ". strtolower($mac) . " " . $ip);
+    }
+
+}
+
+if( isset($check))
+{
+    // Get an array of connected user
+    $conn = $fw->connexions();
+
+    $res = array();
+    foreach($conn as $label => $num)
+    {
+        $res[] = $label . ": " . $num;
+    }
+    echo implode( ', ', $res);
+}
+
+if( isset($bwl))
+{
+    $fw->refreshBlackWhitelist();
+
+}
+
+if( isset($rules))
+{
+    if($fw->checkRules() == true)
+    {
+        echo "OK";
+    }
+    else
+    {
+        echo "KO";
+    }
+
+}
+

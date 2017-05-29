@@ -1,0 +1,20 @@
+#! /bin/bash
+# Script qui parametre les demarages de wifi_rover
+
+# $1 start ou stop
+# $2 heure d'arret/demarrage: [hh:mm]
+#    si vide, supprime la ligne du crontab
+
+# supprime la ligne du crontab
+if [[ -n "$(grep "/etc/init.d/wifi_rover $1" /etc/crontabs/root)" ]]; then
+	sed -i "/\/etc\/init.d\/wifi_rover $1/d" /etc/crontabs/root
+fi
+
+# Ajout la ligne si $2 pas vide
+if [[ -n "$2" ]] ; then
+	min=$(printf "%d" $(echo $2 | sed 's/.*:\(..\)/\1/'))
+	hour=$(echo $2 | sed 's/\(.\+\):.*/\1/')
+
+	echo "$min $hour * * * /etc/init.d/wifi_rover $1" >> /etc/crontabs/root
+fi
+

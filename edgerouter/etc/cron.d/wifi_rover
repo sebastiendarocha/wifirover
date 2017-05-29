@@ -1,0 +1,2 @@
+* * * * * root /sbin/disconnect.sh
+*/10 * * * * root /sbin/watchdog.sh 2>&1 > /tmp/watchdog.log

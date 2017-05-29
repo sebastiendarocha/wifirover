@@ -1,0 +1,161 @@
+#! /bin/bash
+
+operation=$1
+param=$2
+value=$3
+UCI=/sbin/uci
+
+#echo "$0 $1 $2 $3" >> /tmp/change_wifi.log 
+
+# Trouve les interfaces corportate
+ifs=`$UCI show wireless | awk -F= '/network=.lan.$/ {print $1}' | awk -F. '{ print $2}'`
+ifs_corp=`$UCI show wireless | awk -F= '/network=.lan1.$/ {print $1}' | awk -F. '{ print $2}'`
+
+#echo $ifs | xargs echo "Interfaces : $ifs" >> /tmp/change_wifi.log
+#echo $ifs_corp | xargs echo "Interfaces corporate : " >> /tmp/change_wifi.log
+
+
+case "$operation" in
+"set")
+    # Selon le parametre demande
+    case "$param" in
+    "ssid")
+        if [ -z "$value" ] ; then
+            for if in $ifs; do
+                radio=`$UCI get wireless.$if.device`
+                $UCI set wireless.$radio.disabled=1
+                $UCI set wireless.$if.ssid="$value"
+            done
+        else
+            for if in $ifs; do
+                radio=`$UCI get wireless.$if.device`
+                $UCI set wireless.$radio.disabled=0
+                $UCI set wireless.$if.mode=ap
+                $UCI set wireless.$if.ssid="$value"
+            done
+        fi
+        $UCI commit
+        exit 0
+        ;;
+    "ssid_corp")
+        if [ -z "$value" ] ; then
+            for if in $ifs_corp; do
+                $UCI delete wireless.$if
+            done
+            
+            $UCI del dhcp.lan1
+        else
+            # Creer l'interface si elle n'existe pas
+            if [ -z "$ifs_corp" ]; then
+                ifs_corp=`$UCI add wireless wifi-iface`
+            fi
+            $UCI set dhcp.lan1=dhcp
+            $UCI set dhcp.lan1.interface=lan1
+            $UCI set dhcp.lan1.start=10
+            $UCI set dhcp.lan1.limit=500
+            $UCI set dhcp.lan1.leasetime=12h
+            for if in $ifs_corp; do
+                #FIXME: devrait gerer la radio1 aussi
+                $UCI set wireless.$if.device=radio0
+                $UCI set wireless.$if.network=lan1
+                $UCI set wireless.$if.mode=ap
+                $UCI set wireless.$if.ssid="$value"
+            done
+        fi
+        $UCI commit
+        exit 0
+        ;;
+    "key")
+        if [ -z "$ifs_corp" ] ; then
+            echo "No corporate interaface defined, set a corporate SSID"
+            exit 1
+        else
+            for if in $ifs_corp; do
+                $UCI set wireless.$if.encryption=psk2
+                $UCI set wireless.$if.key="$value"
+            done
+            $UCI commit
+            exit 0
+        fi
+        ;;
+    *)
+        echo $usage;
+        exit -1
+        ;;
+    esac
+    ;;
+"get")
+    # Selon le parametre demande
+    case "$param" in
+    "ssid")
+        ssids=()
+        already_defined=0
+        for if in $ifs; do
+            ssidi=`$UCI get wireless.$if.ssid`
+            for i in "${ssids[@]}"; do
+                if [ "$ssidi" == "$i" ]; then
+                    already_defined=1
+                fi
+            done
+            if [ $already_defined -eq 0 ]; then
+                ssids+=("$ssidi")
+            fi
+        done
+        ssid_list=""
+        for i in "${ssids[@]}"; do
+            if [ -n "$ssid_list" ] ; then ssid_list="$ssid_list|" ; fi
+            ssid_list="$ssid_list$i"
+        done
+        echo $ssid_list
+        exit 0
+        ;;
+    "ssid_corp")
+        ssids=()
+        already_defined=0
+        for if in $ifs_corp; do
+            ssidi=`$UCI get wireless.$if.ssid`
+            for i in "${ssids[@]}"; do
+                if [ "$ssidi" == "$i" ]; then
+                    already_defined=1
+                fi
+            done
+            if [ $already_defined -eq 0 ]; then
+                ssids+=("$ssidi")
+            fi
+        done
+        ssid_list=""
+        for i in "${ssids[@]}"; do
+            if [ -n "$ssid_list" ] ; then ssid_list="$ssid_list|" ; fi
+            ssid_list="$ssid_list$i"
+        done
+        echo $ssid_list
+        exit 0
+        ;;
+    "key")
+        already_defined=0
+        for if in $ifs_corp; do
+            keyi=`$UCI get wireless.$if.key`
+            for i in $keys; do
+                if [ "$keyi" == "$i" ]; then
+                    already_defined=1
+                fi
+            done
+            if [ $already_defined -eq 0 ]; then
+            if [ -n "$keys" ] ; then keys="$keys|" ; fi
+                keys="$keys$keyi"
+            fi
+        done
+        echo $keys
+        exit 0
+        ;;
+    *)
+        echo $usage;
+        exit -1
+        ;;
+    esac
+    ;;
+*)
+    echo $usage;
+    exit -1
+    ;;
+esac

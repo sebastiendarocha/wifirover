@@ -1,0 +1,9 @@
+Package: wifirover
+Version: 2017-05-0
+Section: base
+Priority: optional
+Architecture: all
+Depends: dnsmasq, sudo, openvpn
+Replaces: lighttpd,dnsmasq,sudo,php5-cgi, ubnt-util, ubnt-gui-common
+Maintainer: Olivier FONTES <olivier@altsysnet.com>
+Description: Portail Wifi Rover

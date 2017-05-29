@@ -1,0 +1,10 @@
+#!/bin/sh
+# This is a fake rc.common for make scripts which need on debian
+initscript=$1
+action=${2:-help}                               
+shift 2
+
+${INIT_TRACE:+set -x}
+. "$initscript"
+
+$action $@
