@@ -28,6 +28,7 @@ set service dns forwarding listen-on br0
 set service dns forwarding options dhcp-leasefile=/tmp/dhcp.leases
 set service dns forwarding options dhcp-range=192.168.22.10,192.168.23.254,2h
 set service dns forwarding options dhcp-script=/sbin/dhcp-hooks.sh
+set service dns forwarding options dhcp-option=160,http://192.168.22.1:81/
 
 
 set service ssh allow-root
