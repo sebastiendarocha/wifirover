@@ -23,7 +23,6 @@ if (in_array($dest, $ignore)) {
     exit;
 }
 
-$gtw=GTW;
 $cf = '/etc/wifi_rover.conf';
 
 $mac = getRemoteMac();
@@ -48,29 +47,7 @@ if ( SINGLESESSION == 1 ) {
 //Building webstring
 
 $portalmode = getValueFromConf("/etc/wifi_rover.conf", 'PORTALMODE');
-switch( $portalmode)
-{
-default:
-    // TODO Faire un plugin UK qui face les params uke
-    // TODO faire un plugin Default qui genere la webstr
-    // TODO ranger la creation des variables
-    // TODO faire un plugin WebLib qui gere la connexion Weblib + les CloudControlleur multi splash
-
-    $webstr="?gtw-name=" . $gtw. "&gtw-ip=" . GTWADDR . "&gtw-port=" . GTWPORT . "&user-ip=" . IP . "&user-mac=" . $mac . "&user-url=" . $dest . "&borne-mac=" . getBorneMac() . "&captive-portal-version=" . $version;
-    foreach( $_GET as $key => $value)
-    {
-        if( substr($key,0,3) == "uke")
-        {
-            switch( gettype( $value)) {
-                case  "boolean":	
-                case  "integer":	
-                case  "double":	
-                case  "string":	
-                    $webstr.= "&" . $key . "=" . urlencode($value);
-            }
-        }
-    }
-}
+$webstr = implode($redirect->getUrlRedirect());
 error_log($webstr);
 
 //Finally redirect to portal
@@ -79,6 +56,6 @@ echo "<head>";
 echo "<meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" />";
 echo "<meta http-equiv=\"Pragma\" content=\"no-cache\" />";
 echo "<meta http-equiv=\"Expires\" content=\"0\" />";
-echo "<meta http-equiv=\"refresh\" content=\"0; URL=" . URL . $webstr . "\">";
+echo "<meta http-equiv=\"refresh\" content=\"0; URL=" . $webstr . "\">";
 echo "</head>";
 echo "</html>";
