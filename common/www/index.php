@@ -16,7 +16,6 @@ $redirect = new redirect();
 
 $ignore = $redirect->getListIgnoreSites();
 
-$version = "";
 $dest = $_SERVER['HTTP_HOST'];
 
 if (in_array($dest, $ignore)) {
