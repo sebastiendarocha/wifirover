@@ -126,17 +126,6 @@ function setHeader($url = "") {
     }
 }
 
-function WS_Confirm_User() {
-    /*
-     * Send request to web service to inform about connexion
-     */
-    $user_id   = urlencode( $_GET['user-id'] );
-    $token     = calculateToken(  $user_id);
-
-    $url=SVC_CONFIRM_USER.'?user-id=' . $user_id . '&token=' .$token;
-    $res=file_get_contents($url);
-}
-
 function calculateToken($str) {
     /*
      *  Calculate token with constant KEY and $str
