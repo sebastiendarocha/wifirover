@@ -82,28 +82,6 @@ function sendToLog($message) {
     sendToFile($date . " " . $message, LOGFILE);
 }
 
-
-function informServerAboutCnx() {
-    /*
-     * Send request to web service to inform about connexion
-     */
-    $ip=urlencode ( $_GET['user-ip'] );
-    $mac=urlencode( $_GET['user-mac'] );
-    $key=md5(KEY.$ip.GTW);
-    $url=SVC_FNAME.'?&ip='.$ip.'&gtw='.GTW.'&mac='.$mac.'&key='.$key;
-    foreach( $_GET as $key => $value)
-    {
-	switch( gettype( $value)) {
-	case  "boolean":	
-	case  "integer":	
-	case  "double":	
-	case  "string":	
-	        $url .= "&" . $key . "=" . urlencode($value);
-	}
-    }
-    $res=file_get_contents($url);
-}
-
 function setHeader($url = "") {
     /*
      * Do a redirect against $url or $_GET['redirect'] or by default on http://www.google.fr
@@ -124,17 +102,6 @@ function setHeader($url = "") {
     {
         header( $url);
     }
-}
-
-function WS_Confirm_User() {
-    /*
-     * Send request to web service to inform about connexion
-     */
-    $user_id   = urlencode( $_GET['user-id'] );
-    $token     = calculateToken(  $user_id);
-
-    $url=SVC_CONFIRM_USER.'?user-id=' . $user_id . '&token=' .$token;
-    $res=file_get_contents($url);
 }
 
 function calculateToken($str) {

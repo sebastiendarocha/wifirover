@@ -64,6 +64,8 @@ class connexion extends plugable {
             // Synchronise firewall on array
             $fw = new firewall();
             $fw->synchronizeConnexions( $macs_connected);
+
+            $this->foreach_plugins( "connectedUser", $get);
         }
         return $was_connected;
     }

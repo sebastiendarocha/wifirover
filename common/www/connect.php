@@ -21,11 +21,6 @@ if (compareToken($_GET['token'], $_GET['user-ip'] . $_GET['user-mac'] . $_GET['t
         $cnx = new connexion();
 
         $was_connected = $cnx->connectUser($_GET['user-mac'],  $_GET['user-ip'], $_GET);
-        // if user wasn't connected, informe about connexion
-        if ( $was_connected == false)
-        {
-            @informServerAboutCnx();
-        }
 
 //        sleep(2);
         setHeader();

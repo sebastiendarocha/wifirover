@@ -32,7 +32,8 @@ function getListIgnoreSites( $get = array()) {
 
     function getUrlRedirect()
     {
-		$webstr="?gtw-name=" . GTW. "&gtw-ip=" . GTWADDR . "&gtw-port=" . GTWPORT . "&user-ip=" . IP . "&user-mac=" . $mac . "&user-url=" . $dest . "&borne-mac=" . getBorneMac() . "&captive-portal-version=" . $version;
+		$version = file_get_contents("/etc/version_wr_uk");
+		$webstr="?gtw-name=" . GTW. "&gtw-ip=" . GTWADDR . "&gtw-port=" . GTWPORT . "&user-ip=" . IP . "&user-mac=" . getRemoteMac() . "&user-url=" . $_SERVER['HTTP_HOST'] . "&borne-mac=" . getBorneMac() . "&captive-portal-version=" . $version;
 		foreach( $_GET as $key => $value)
 		{
 			if( substr($key,0,3) == "uke")

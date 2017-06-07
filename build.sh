@@ -65,7 +65,11 @@ Depends: firewall, base-files, base-files, php7, dnsmasq-full
 Replaces: firewall, base-files, base-files, php7, dnsmasq-full
 EOF
 
-tar czf $DEST/lede/control.tar.gz -C $DEST/lede/ control
+cat > $DEST/lede/conffiles << EOF
+/etc/wifi_rover.conf
+EOF
+
+tar czf $DEST/lede/control.tar.gz -C $DEST/lede/ control conffiles
 
 
 echo 2.0 > $DEST/lede/debian-binary
@@ -79,5 +83,5 @@ wc -c $DEST/lede/wifirover.ipk | awk '{ print "Size: " $1 }' >> $DEST/lede/Packa
 echo "Filename: wifirover.ipk" >> $DEST/lede/Packages
 echo "" >> $DEST/lede/Packages
 
-rm -rf $DEST/lede/control.tar.gz $DEST/lede/data.tar.gz $DEST/lede/debian-binary $DEST/lede/control $DEST/lede/ipk
+rm -rf $DEST/lede/control.tar.gz $DEST/lede/data.tar.gz $DEST/lede/debian-binary $DEST/lede/control $DEST/lede/conffiles $DEST/lede/ipk
 

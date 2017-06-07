@@ -29,6 +29,7 @@ class firewall extends plugable {
 
         $CAPTIVENET = getValueFromConf(CF, 'CAPTIVENET');
         $IPPORTAL = getValueFromConf(CF, 'IPPORTAL');
+        $CAPTURE_DNS = getValueFromConf(CF, 'CAPTURE_DNS');
 
         $GTW = getValueFromConf(CF, 'GTW');
         $GTWPORT = getValueFromConf(CF, 'GTWPORT');
@@ -76,6 +77,13 @@ class firewall extends plugable {
         $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p tcp --dport 443 -s $CAPTIVENET -d $IPPORTAL -j ACCEPT";
         $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p tcp --dport 80 -s $CAPTIVENET -j DNAT --to-destination $GTW:$GTWPORT";
         $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p tcp --dport 443 -s $CAPTIVENET -j DNAT --to-destination $GTW:$GTWPORT_SSL";
+
+        // Capture Dns
+        if(  $CAPTURE_DNS == 1 )
+        {
+            $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p tcp --dport 53 -s $CAPTIVENET -j DNAT --to-destination $GTW:53";
+            $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p udp --dport 53 -s $CAPTIVENET -j DNAT --to-destination $GTW:53";
+        }
 
         // Whitelist some domains
         $rules[] = "$IPTABLES -t nat -I PREROUTING -i $LANIF -s $CAPTIVENET  -m set --match-set whitelist_domain dst -j ACCEPT";
