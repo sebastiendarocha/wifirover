@@ -186,6 +186,12 @@ function getTunInterface()
     return $tunif;
 }
 
+function getNetworkOfInterface( $interface) {
+    $command = "/sbin/ip addr show dev $interface | grep 'inet '| awk '{print $2}'";
+    $net = exec( $command);
+    return $net;
+}
+
 
 function getIPFrontal()
 {
