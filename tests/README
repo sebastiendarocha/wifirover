@@ -1,0 +1,4 @@
+dependencies:
+python3-dnspython
+
+Replace env.sample by env to the script
