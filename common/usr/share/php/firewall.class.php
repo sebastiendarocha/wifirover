@@ -92,8 +92,7 @@ class firewall extends plugable {
         // Capture Dns
         if(  $CAPTURE_DNS == 1 )
         {
-            $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p tcp --dport 53 -s $CAPTIVENET -j DNAT --to-destination $GTW:53";
-            $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p udp --dport 53 -s $CAPTIVENET -j DNAT --to-destination $GTW:53";
+            $rules[] = "$IPTABLES -t nat -I PROXY -i $LANIF -p udp --dport 53 -s $CAPTIVENET -j DNAT --to-destination $GTW:53";
         }
 
         // Whitelist some domains
