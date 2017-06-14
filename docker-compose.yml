@@ -1,0 +1,67 @@
+version: '2'
+services:
+    portal_mock:
+        image: php:apache
+        volumes:
+            - ./tests/mocks/portal:/var/www/html/
+        networks:
+            - default
+
+    client:
+        image: debian
+        links:
+            - wifirover
+        depends_on:
+            - wifirover
+        networks:
+            - lan
+
+    client_corporate:
+        image: debian
+        links:
+            - wifirover
+        depends_on:
+            - wifirover
+        networks:
+            - corporate
+
+    wifirover:
+        build: ./
+        cap_add:
+            - NET_ADMIN
+        #command: phpunit  /root/tests/
+        environment:
+            WIFICMD: test
+        links:
+            - portal_mock
+        depends_on:
+            - portal_mock
+        ports:
+            - "8000:8000"
+        networks:
+            default:
+            lan:
+                ipv4_address: 192.168.22.2
+            corporate:
+                ipv4_address: 192.168.32.2
+                
+networks:
+    default:
+    corporate:
+        external: true
+    lan:
+        #driver: overlay
+        #ipam:
+        #    config:
+        #        - subnet: 192.168.22.0/24
+        #        - gateway : 192.168.22.5
+                
+        #driver: bridge
+        #driver_opts:
+        #    subnet: 192.168.22.0/24
+        #internal: true
+        external: true
+
+# You must create the lan network by hand:
+# docker network create --subnet 192.168.22.0/24 lan
+# docker network create --subnet 192.168.32.0/24 corporate

@@ -35,12 +35,23 @@ class firewall extends plugable {
         $GTWPORT_SSL = getValueFromConf(CF, 'GTWPORT_SSL');
 
 
-        $rules = array(
-            "$IPTABLES -F -t nat",
+
+        $DOCKER = getValueFromConf(CF, 'DOCKER');
+        if( $DOCKER == "1")
+        {
+            $rules = array();
+        }
+        else
+        {
+            $rules = array(
+                "$IPTABLES -F -t nat",
+                "$IPTABLES -X -t nat",
+            );
+        }
+
+        $rules += array(
             "$IPTABLES -F",
             "$IPTABLES -X",
-            "$IPTABLES -X -t nat",
-
             "$IPTABLES -P INPUT ACCEPT",
             "$IPTABLES -P OUTPUT ACCEPT",
             "$IPTABLES -P FORWARD DROP",
@@ -137,6 +148,7 @@ class firewall extends plugable {
         $CORPORATEPROXY = getValueFromConf(CF, 'CORPORATEPROXY');
         $CORPIF = getValueFromConf(ICF, 'CORPIF');
         $CORPORATE_REDIRECT = getValueFromConf(CF, 'CORPORATE_REDIRECT');
+        $CORPORATE_PROTECT = getValueFromConf(CF, 'CORPORATE_PROTECT');
         if( $CORPORATENET != "" ) {
             foreach( explode(" ", trim($CORPORATENET,'"')) as $CORPORATENETi)
             {
@@ -147,8 +159,19 @@ class firewall extends plugable {
                     $rules[] = "$IPTABLES -t nat -I PROXY -p tcp --dport 80 -s $CORPORATENETi -j DNAT --to-destination $PROXY:$PROXYPORT";
                 }
                 $rules[] = "$IPTABLES -A INPUT -j ACCEPT -p udp --dport 53 -s $CORPORATENETi -m comment --comment 'DNS from CORPORATE LAN'";
+                if( $CORPORATE_PROTECT == "1")
+                {
+                    $rules[] = "$IPTABLES -I FORWARD -s $CAPTIVENET -d $CORPORATENETi -j DROP -m comment --comment 'Protection GUEST -> CORPORATE'";
+                }
             }
         }
+        $WAN_PROTECT = getValueFromConf(CF, 'WAN_PROTECT');
+        $WAN_NET = getNetworkOfInterface($WANIF);
+        if( $WAN_PROTECT == 1)
+        {
+            $rules[] = "$IPTABLES -I FORWARD -s $CAPTIVENET -d $WAN_NET -j DROP -m comment --comment 'Protection GUEST -> WAN'";
+        }
+
         if( $CORPIF != "") {
             if( $CORPORATE_REDIRECT != "")
             {
@@ -164,6 +187,7 @@ class firewall extends plugable {
                 }
             }
         }
+
 
         # If splash is disabled
         $GTWNAME = getValueFromConf(CF, 'GTWNAME');
@@ -184,6 +208,13 @@ class firewall extends plugable {
             $rules[] = "$IPTABLES -I FORWARD -d $UNIFI -p tcp --dport 8080 -j ACCEPT -m comment --comment 'Unifi connection to the controler'";
         }
 
+        # If in Docker environnement
+        $DOCKER = getValueFromConf(CF, 'DOCKER');
+        if( $GTWNAME == "1" )  {
+            $rules[] = "$IPTABLES -A OUTPUT -d 127.0.0.11/32 -j DOCKER_OUTPUT";
+            $rules[] = "$IPTABLES -A POSTROUTING -d 127.0.0.11/32 -j DOCKER_POSTROUTING";
+
+        }
         if( isEdgeRouter())
         {
             $rules[] = "$IPTABLES -A INPUT -j ACCEPT -i $TUNIF -p tcp --dport 443 -m comment --comment 'Interface Web VPN'";
@@ -242,11 +273,22 @@ class firewall extends plugable {
         $GTW = getValueFromConf(CF, 'GTW');
         $GTWPORT = getValueFromConf(CF, 'GTWPORT');
 
-        $rules = array(
-            "$IPTABLES -F -t nat",
+        $DOCKER = getValueFromConf(CF, 'DOCKER');
+        if( $DOCKER == "1")
+        {
+            $rules = array();
+        }
+        else
+        {
+            $rules = array(
+                "$IPTABLES -F -t nat",
+                "$IPTABLES -X -t nat",
+            );
+        }
+
+        $rules += array(
             "$IPTABLES -F",
             "$IPTABLES -X",
-            "$IPTABLES -X -t nat",
 
             "$IPTABLES -P INPUT ACCEPT",
             "$IPTABLES -P OUTPUT ACCEPT",
