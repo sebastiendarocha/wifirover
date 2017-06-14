@@ -165,6 +165,13 @@ class firewall extends plugable {
                 }
             }
         }
+        $WAN_PROTECT = getValueFromConf(CF, 'WAN_PROTECT');
+        $WAN_NET = getNetworkOfInterface($WANIF);
+        if( $WAN_PROTECT == 1)
+        {
+            $rules[] = "$IPTABLES -I FORWARD -s $CAPTIVENET -d $WAN_NET -j DROP -m comment --comment 'Protection GUEST -> WAN'";
+        }
+
         if( $CORPIF != "") {
             if( $CORPORATE_REDIRECT != "")
             {

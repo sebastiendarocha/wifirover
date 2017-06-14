@@ -23,14 +23,15 @@ services:
         depends_on:
             - wifirover
         networks:
-            - zcorporate
+            - corporate
 
     wifirover:
         build: ./
         cap_add:
             - NET_ADMIN
-        command: phpunit  /root/tests/
-        #command: /root/unit_tests.php
+        #command: phpunit  /root/tests/
+        environment:
+            WIFICMD: test
         links:
             - portal_mock
         depends_on:
@@ -41,12 +42,12 @@ services:
             default:
             lan:
                 ipv4_address: 192.168.22.2
-            zcorporate:
-                ipv4_address: 192.168.42.2
+            corporate:
+                ipv4_address: 192.168.32.2
                 
 networks:
     default:
-    zcorporate:
+    corporate:
         external: true
     lan:
         #driver: overlay
@@ -63,4 +64,4 @@ networks:
 
 # You must create the lan network by hand:
 # docker network create --subnet 192.168.22.0/24 lan
-# docker network create --subnet 192.168.42.0/24 zcorporate
+# docker network create --subnet 192.168.32.0/24 corporate
