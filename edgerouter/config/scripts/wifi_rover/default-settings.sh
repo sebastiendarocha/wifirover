@@ -1,11 +1,21 @@
 #! /bin/vbash
 source /opt/vyatta/etc/functions/script-template
 configure
+
+delete interfaces bridge br0
 set interfaces bridge br0
 set interfaces bridge br0 address 192.168.22.1/23
+
+delete interfaces ethernet eth1
 set interfaces ethernet eth1 bridge-group bridge br0
+
+delete interfaces ethernet eth2
 set interfaces ethernet eth2 bridge-group bridge br0
+
+delete interfaces ethernet eth3
 set interfaces ethernet eth3 bridge-group bridge br0
+
+delete interfaces ethernet eth4
 set interfaces ethernet eth4 bridge-group bridge br0
 
 delete port-forward
@@ -18,6 +28,7 @@ set service dns forwarding listen-on br0
 set service dns forwarding options dhcp-leasefile=/tmp/dhcp.leases
 set service dns forwarding options dhcp-range=192.168.22.10,192.168.23.254,2h
 set service dns forwarding options dhcp-script=/sbin/dhcp-hooks.sh
+set service dns forwarding options dhcp-option=160,http://192.168.22.1:81/
 
 
 set service ssh allow-root
