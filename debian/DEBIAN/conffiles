@@ -1,7 +1,7 @@
 /etc/wifi_rover.conf
 /etc/interfaces.conf
 /etc/cron.d/wifi_rover
-/etc/dnsmasq.conf
+/etc/dnsmasq.d/wifirover
 /etc/firewall.user
 /etc/init.d/wifi_rover
 /etc/rc.local
