@@ -5,5 +5,4 @@
 /etc/firewall.user
 /etc/init.d/wifi_rover
 /etc/rc.local
-/etc/php5/cgi/php.ini
 /etc/sudoers.d/wifi_rover

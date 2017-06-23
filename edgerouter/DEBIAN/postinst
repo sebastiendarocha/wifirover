@@ -1,12 +1,17 @@
 #!/bin/bash
 
-# Setting rights
-/bin/chown -R www-data:www-data /www
+# setup cron
 /bin/chown root:root /etc/cron.d/wifi_rover
 /bin/chmod 0600 /etc/cron.d/wifi_rover
+/bin/sed -i '/EXTRA_OPTS=.*/d' /etc/default/cron
+echo 'EXTRA_OPTS="-l -L 5"' >> /etc/default/cron
+
+# setup sudo
 /bin/chown -R root:root /etc/sudoers.d
 /bin/chmod 0440 /etc/sudoers.d/wifi_rover
-/bin/chown -R root:root /root/.ssh/
-/bin/chmod 0600 /root/.ssh/
+
+# setup watchdog
 /bin/chmod 0755 /etc/watchdog.d/*
-/usr/sbin/update-rc.d lighttpd_ssl defaults
+
+# Setup web site
+/bin/chown -R www-data:www-data /www
