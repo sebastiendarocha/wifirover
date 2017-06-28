@@ -305,7 +305,6 @@ class firewall extends plugable {
 
         ));
 
-	print_r($rules);
         $rules = array_merge($rules, $this->foreach_plugins( "stopFirewall"));
 
         $this->refreshBlackWhitelist(false);
