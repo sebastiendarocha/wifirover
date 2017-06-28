@@ -5,6 +5,7 @@
 DPKGDEB="/usr/bin/dpkg-deb";
 RSYNC="/usr/bin/rsync -a";
 DEST=build_`cat common/etc/version_wr`
+VERSION_WR=$(cat ../wifirover/common/etc/version_wr)
 
 #Excluding .gitignore files
 EXCLUDE='--exclude=.git';
@@ -74,13 +75,13 @@ tar czf $DEST/lede/control.tar.gz -C $DEST/lede/ control conffiles
 
 echo 2.0 > $DEST/lede/debian-binary
 
-tar czf $DEST/lede/wifirover.ipk -C $DEST/lede control.tar.gz data.tar.gz  debian-binary > /dev/null
+tar czf $DEST/lede/wifirover_${VERSION_WR}.ipk -C $DEST/lede control.tar.gz data.tar.gz  debian-binary > /dev/null
 
 # Append info to Packages
 cat $DEST/lede/control >> $DEST/lede/Packages
-md5sum -b $DEST/lede/wifirover.ipk | awk '{ print "MD5Sum: " $1 }' >> $DEST/lede/Packages
-wc -c $DEST/lede/wifirover.ipk | awk '{ print "Size: " $1 }' >> $DEST/lede/Packages
-echo "Filename: wifirover.ipk" >> $DEST/lede/Packages
+md5sum -b $DEST/lede/wifirover_${VERSION_WR}.ipk | awk '{ print "MD5Sum: " $1 }' >> $DEST/lede/Packages
+wc -c $DEST/lede/wifirover_${VERSION_WR}.ipk | awk '{ print "Size: " $1 }' >> $DEST/lede/Packages
+echo "Filename: wifirover_${VERSION_WR}.ipk" >> $DEST/lede/Packages
 echo "" >> $DEST/lede/Packages
 
 rm -rf $DEST/lede/control.tar.gz $DEST/lede/data.tar.gz $DEST/lede/debian-binary $DEST/lede/control $DEST/lede/conffiles $DEST/lede/ipk
