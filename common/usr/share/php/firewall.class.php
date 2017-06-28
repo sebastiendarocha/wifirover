@@ -50,7 +50,7 @@ class firewall extends plugable {
             );
         }
 
-        $rules += array(
+        $rules = array_merge($rules,array(
             "$IPTABLES -F",
             "$IPTABLES -X",
             "$IPTABLES -P INPUT ACCEPT",
@@ -66,7 +66,7 @@ class firewall extends plugable {
             "$IPTABLES -N WR_FWD",
 
             "$IPSET create whitelist_domain hash:ip -exist",
-        );
+        ));
 
         // Setup Blacklist, Whitelist and Wifi rover chains
         $rules[] = "$IPTABLES -A FORWARD -j BL";
@@ -293,7 +293,7 @@ class firewall extends plugable {
             );
         }
 
-        $rules += array(
+        $rules = array_merge($rules, array(
             "$IPTABLES -F",
             "$IPTABLES -X",
 
@@ -303,8 +303,9 @@ class firewall extends plugable {
 
             "$IPTABLES -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT",
 
-        );
+        ));
 
+	print_r($rules);
         $rules = array_merge($rules, $this->foreach_plugins( "stopFirewall"));
 
         $this->refreshBlackWhitelist(false);
