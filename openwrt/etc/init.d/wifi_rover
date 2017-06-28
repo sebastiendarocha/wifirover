@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash /etc/rc.common
 
 ### BEGIN INIT INFO
 # Provides:          wifi_rover
