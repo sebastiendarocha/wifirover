@@ -154,7 +154,6 @@ class firewall extends plugable {
         $CORPORATENET = getValueFromConf(CF, 'CORPORATENET');
         $CORPORATEPROXY = getValueFromConf(CF, 'CORPORATEPROXY');
         $CORPIF = getValueFromConf(ICF, 'CORPIF');
-        $CORPORATE_REDIRECT = getValueFromConf(CF, 'CORPORATE_REDIRECT');
         $CORPORATE_PROTECT = getValueFromConf(CF, 'CORPORATE_PROTECT');
         if( $CORPORATENET != "" ) {
             foreach( explode(" ", trim($CORPORATENET,'"')) as $CORPORATENETi)
@@ -180,18 +179,8 @@ class firewall extends plugable {
         }
 
         if( $CORPIF != "") {
-            if( $CORPORATE_REDIRECT != "")
-            {
-                $rules[] = "$IPSET create corp_connected hash:ip -exist";
-            }
             foreach( explode(" ", trim($CORPIF,'"')) as $CORPIFi) {
                 $rules[] = "$IPTABLES -A INPUT -j ACCEPT -p udp --dport 67 -i $CORPIFi -m comment --comment 'DHCP from CORPORATE LAN'";
-                if( $CORPORATE_REDIRECT != "")
-                {
-                    $ipcorp = getIPFromInterface($CORPIFi);
-                    $rules[] = "$IPTABLES -I PREROUTING -t nat -i $CORPIFi -p tcp -m tcp --dport 80 -j DNAT --to-destination $ipcorp:81";
-                    $rules[] = "$IPTABLES -I PREROUTING -t nat -i $CORPIFi -m set --match-set corp_connected src -j ACCEPT";
-                }
             }
         }
 
