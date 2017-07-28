@@ -134,6 +134,7 @@ class firewall extends plugable {
         $rules[] = "$IPTABLES -A INPUT -j ACCEPT -i lo -m comment --comment 'Local communication'";
         $rules[] = "$IPTABLES -A INPUT -j ACCEPT -i $TUNIF -m comment --comment 'Access from VPN'";
         $rules[] = "$IPTABLES -A INPUT -j ACCEPT -p tcp --dport 22 -m comment --comment 'SSH'";
+        $rules[] = "$IPTABLES -A INPUT -j ACCEPT -p icmp -m comment --comment 'PING'";
         $rules[] = "$IPTABLES -A INPUT -j ACCEPT -p udp --dport 53 $OUT -m comment --comment 'DNS from LAN'";
         $rules[] = "$IPTABLES -A INPUT -j ACCEPT -p udp --dport 67 $OUT -m comment --comment 'DHCP from LAN'";
         $rules[] = "$IPTABLES -A INPUT -j DROP   -p tcp --dport $GTWPORT -i $WANIF -m comment --comment 'HTTP DENY FROM WAN'";
