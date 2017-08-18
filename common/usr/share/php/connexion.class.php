@@ -44,8 +44,12 @@ class connexion extends plugable {
      * \param mac
      * \param $ip
      */
-    function connectUser($mac,$ip, $get = array()) {
-	$lease_time = time() + getValueFromConf($this->cf, 'CTIMEOUT');
+    function connectUser($mac,$ip,$date_end="", $get = array()) {
+        if ( is_numeric($date_end) ) {
+            $lease_time = $date_end;
+        } else {
+            $lease_time = time() + getValueFromConf($this->cf, 'CTIMEOUT');
+        }
         $this->foreach_plugins( "connectUser", $get);
 
         $was_connected = $this->isUserConnected( $mac);
