@@ -43,10 +43,14 @@ class connexion extends plugable {
     /**
      * \param mac
      * \param $ip
+     * \param date_end
+     * \param lifespan
      */
-    function connectUser($mac,$ip,$date_end="", $get = array()) {
+    function connectUser($mac,$ip,$date_end="",$lifespan="", $get = array()) {
         if ( is_numeric($date_end) ) {
             $lease_time = $date_end;
+        } elseif (is_numeric($lifespan)) {
+            $lease_time = time() + $lifespan;
         } else {
             $lease_time = time() + getValueFromConf($this->cf, 'CTIMEOUT');
         }
