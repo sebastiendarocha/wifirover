@@ -11,11 +11,11 @@ class Connection(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        check_output(['bash', 'connect.sh', 'modify', '10'])
+        check_output(['bash', 'connect.sh', 'modify_timeout', '10'])
 
     @classmethod
     def tearDownClass(cls):
-        check_output(['bash', 'connect.sh', 'modify', '7200'])
+        check_output(['bash', 'connect.sh', 'modify_timeout', '7200'])
 
     def test_connection(self):
         """ test if connection is not operationnal
@@ -26,8 +26,8 @@ class Connection(unittest.TestCase):
     def test_disconnect(self):
         """ check if connection is still active 
         """
-        check_output(['bash', 'connect.sh', 'portalvalide_end_weblib'])
-        check_output(['bash', 'connect.sh', 'disconnect'])
+        requests.get('http://192.168.22.1:81/login?&username=toto&date_end=%s&userurl=http://www.google.fr&response=toto' % str(int(time.time()) + 20))
+        requests.get('http://192.168.22.1:81/disconnect.php')
         r = requests.get('http://linuxfr.org')
         self.assertIn("<title>Accueil - LinuxFr.org</title>", r.text)
 
@@ -35,7 +35,7 @@ class Connection(unittest.TestCase):
         """ test if client is not disconnected after wifirover conf file timeout
         """
         time.sleep(11)
-        check_output(['bash', 'connect.sh', 'disconnect'])
+        requests.get('http://192.168.22.1:81/disconnect.php')
         r = requests.get('http://linuxfr.org')
         self.assertIn("<title>Accueil - LinuxFr.org</title>", r.text)
 
@@ -43,7 +43,7 @@ class Connection(unittest.TestCase):
         """ test if client is disconnected after timeout date end parameter
         """
         time.sleep(11)
-        check_output(['bash', 'connect.sh', 'disconnect'])
+        requests.get('http://192.168.22.1:81/disconnect.php')
         r = requests.get('http://linuxfr.org')
         self.assertNotIn("<title>Accueil - LinuxFr.org</title>", r.text)
 
