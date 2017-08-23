@@ -5,9 +5,16 @@ import time
 import pdb
 import requests
 import re
+import md5
 
 
 class Connection(unittest.TestCase):
+    ip="192.168.23.124"
+    user_mac="b8:27:eb:6a:de:f6"
+    timestamp=int(time.time())
+    date_end = ""
+    lifespan = 20
+    key = "coin"
 
     @classmethod
     def setUpClass(cls):
@@ -26,9 +33,10 @@ class Connection(unittest.TestCase):
     def test_disconnect(self):
         """ check if connection is still active 
         """
-        date_end = int(time.time()) + 20
-        lifespan = 5
-        requests.get('http://192.168.22.1:81/login?&username=toto&date_end=%s&lifespan=%s&userurl=http://www.google.fr&response=toto' % (str(date_end), str(lifespan)))
+        m = md5.new()
+        m.update(self.key + self.ip + self.user_mac + str(self.timestamp) + self.date_end + str(self.lifespan))
+        token = m.hexdigest()
+        requests.get('http://192.168.22.1:81/connect.php?user-ip=%s&user-id=&user-mac=%s&timestamp=%d&redirect=http://www.google.fr&token=%s&date_end=%s&lifespan=%d' % (self.ip, self.user_mac, self.timestamp, token, self.date_end, self.lifespan))
         requests.get('http://192.168.22.1:81/disconnect.php')
         r = requests.get('http://linuxfr.org')
         self.assertIn("<title>Accueil - LinuxFr.org</title>", r.text)

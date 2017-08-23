@@ -26,8 +26,8 @@ class Connection(unittest.TestCase):
     def test_disconnect(self):
         """ check if connection is still active 
         """
-        date_end = int(time.time()) + 20
-        lifespan = 5
+        date_end = ""
+        lifespan = 20
         requests.get('http://192.168.22.1:81/login?&username=toto&date_end=%s&lifespan=%s&userurl=http://www.google.fr&response=toto' % (str(date_end), str(lifespan)))
         requests.get('http://192.168.22.1:81/disconnect.php')
         r = requests.get('http://linuxfr.org')

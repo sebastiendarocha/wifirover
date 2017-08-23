@@ -13,6 +13,7 @@ class Connection(unittest.TestCase):
     user_mac="b8:27:eb:6a:de:f6"
     timestamp=int(time.time())
     date_end = timestamp + 20
+    lifespan = 5
     key = "coin"
 
     @classmethod
@@ -33,9 +34,9 @@ class Connection(unittest.TestCase):
         """ check if connection is still active 
         """
         m = md5.new()
-        m.update(self.key + self.ip + self.user_mac + str(self.timestamp) + str(self.date_end))
+        m.update(self.key + self.ip + self.user_mac + str(self.timestamp) + str(self.date_end) + str(self.lifespan))
         token = m.hexdigest()
-        requests.get('http://192.168.22.1:81/connect.php?user-ip=%s&user-id=&user-mac=%s&timestamp=%d&redirect=http://www.google.fr&token=%s&date_end=%d' % (self.ip, self.user_mac, self.timestamp, token, self.date_end))
+        requests.get('http://192.168.22.1:81/connect.php?user-ip=%s&user-id=&user-mac=%s&timestamp=%d&redirect=http://www.google.fr&token=%s&date_end=%d&lifespan=%d' % (self.ip, self.user_mac, self.timestamp, token, self.date_end, self.lifespan))
         requests.get('http://192.168.22.1:81/disconnect.php')
         r = requests.get('http://linuxfr.org')
         self.assertIn("<title>Accueil - LinuxFr.org</title>", r.text)
