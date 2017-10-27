@@ -83,6 +83,15 @@ class firewall extends plugable {
             $rules[] = "$IPTABLES -A INPUT -j ACCEPT -i $LANIF -p tcp --dport 443 -m comment --comment 'Interface Web LAN'";
         }
 
+        // If connection uses IPset
+        $CONNECTION_IPSET = getValueFromConf(CF, 'CONNECTION_IPSET');
+        if($CONNECTION_IPSET == 1)
+        {
+            $rules[] = "$IPSET create connections hash:ip -exist";
+            $rules[] = "$IPTABLES -A WR_FWD -m set --match-set connections src -j ACCEPT";
+            $rules[] = "$IPTABLES -t nat -I WR_PRE -m set --match-set connections src -j PROXY";
+        }
+
         // Redirect to portal
         $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p tcp --dport 80 -s $CAPTIVENET -d $IPPORTAL -j ACCEPT";
         $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p tcp --dport 443 -s $CAPTIVENET -d $IPPORTAL -j ACCEPT";
@@ -256,24 +265,43 @@ class firewall extends plugable {
         $LOG = getValueFromConf(CF, 'LOG_IPTABLES');
         foreach( $rules as $rule)
         {
-            if( $LOG == 1)
+            $out = array();
+            exec($rule, $out, $err);
+            if( ($LOG == 1 and $err != 0) or $LOG == 2)
             {
+                if($err != 0)
+                {
+                    $IPTABLES = $this->getFirewallCommand();
+                    exec( "$IPTABLES -S", $out);
+                    exec( "$IPTABLES -S -t nat", $out);
+                }
                 error_log( $rule);
+                error_log( print_r($out,true));
             }
-            exec($rule);
         }
     }
 
 
     function stopFirewall() {
         $IPTABLES = $this->getFirewallCommand();
+        $IPSET = $this->getIpsetCommand();
         $GTW = getValueFromConf(CF, 'GTW');
         $GTWPORT = getValueFromConf(CF, 'GTWPORT');
 
         $DOCKER = getValueFromConf(CF, 'DOCKER');
         if( $DOCKER == "1")
         {
-            $rules = array();
+            $WANIF = getValueFromConf(ICF, 'WANIF');
+            $rules = array(
+                "$IPTABLES -t nat -F PREROUTING",
+                "$IPTABLES -F BYPASS -t nat",
+                "$IPTABLES -X BYPASS -t nat",
+                "$IPTABLES -F WR_PRE -t nat",
+                "$IPTABLES -X WR_PRE -t nat",
+                "$IPTABLES -F PROXY -t nat",
+                "$IPTABLES -X PROXY -t nat",
+                "$IPTABLES -D POSTROUTING -t nat -o $WANIF -j MASQUERADE",
+            );
         }
         else
         {
@@ -292,9 +320,13 @@ class firewall extends plugable {
             "$IPTABLES -P FORWARD DROP",
 
             "$IPTABLES -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT",
-
         ));
 
+        @exec( "$IPSET list connections 2> /dev/null", $output, $err);
+        if( $err == 0)
+        { 
+           $rules[] = "$IPSET destroy connections";
+        }
         $rules = array_merge($rules, $this->foreach_plugins( "stopFirewall"));
 
         $this->refreshBlackWhitelist(false);
@@ -306,17 +338,33 @@ class firewall extends plugable {
      */
     function synchronizeConnexions($macs_connected)
     {
+        if( getValueFromConf(CF, 'CONNECTION_IPSET') == "1")
+        {
+            $this->synchronizeConnexionsIPSet($macs_connected);
+        }
+        else
+        {
+            $this->synchronizeConnexionsIPTables($macs_connected);
+        }
+    }
+
+    /**
+     * \param macs_hash
+     */
+    function synchronizeConnexionsIPTables($macs_connected)
+    {
         $macs_hash = array();
         $ips_hash = array();
         // Load the IP of the connected users
         $mac_ips = $this->getDHCPLeases();
         foreach($macs_connected as $mac_connected)
         {
-            if( isset($mac_ips[$mac_connected]))
+            $mac_to_connect = strtoupper($mac_connected);
+            if( isset($mac_ips[$mac_to_connect]))
             {
-                $ip_connected = $mac_ips[$mac_connected];
-                $macs_hash[$mac_connected] = $ip_connected;
-                $ips_hash[$ip_connected] = $mac_connected;
+                $ip_connected = $mac_ips[$mac_to_connect];
+                $macs_hash[$mac_to_connect] = $ip_connected;
+                $ips_hash[$ip_connected] = $mac_to_connect;
             }
         }
 
@@ -405,6 +453,82 @@ class firewall extends plugable {
 
         $this->execCommand( $commands);
     }
+    /**
+     * \param macs_hash
+     */
+    function synchronizeConnexionsIPSet($macs_connected)
+    {
+        if( getValueFromConf(CF, 'CONNECTION_IPSET') == "1")
+        {
+            $macs_hash = array();
+            $ips_hash = array();
+            // Load the IP of the connected users
+            $mac_ips = $this->getDHCPLeases();
+            #var_dump($mac_ips);
+            foreach($macs_connected as $mac_connected)
+            {
+                $mac_to_connect = strtoupper($mac_connected);
+                if( isset($mac_ips[$mac_to_connect]))
+                {
+                    $ip_connected = $mac_ips[$mac_to_connect];
+                    $macs_hash[$mac_to_connect] = $ip_connected;
+                    $ips_hash[$ip_connected] = $mac_to_connect;
+                }
+            }
+
+            #echo 'Macs and IP to connect';
+            #var_dump( $ips_hash);
+
+            // Get all clients connected in ipset
+            $IPSET = $this->getIpsetCommand();
+
+            $result = array();
+            $command =  $IPSET . ' -L connections -o save'  ;
+            $table_ipset = array();
+            exec( $command, $result);
+            array_shift($result); // Remove header
+
+            foreach($result as $rule)
+            {
+                $ip = explode(' ', $rule)[2];
+                if( isset($ips_hash[$ip]))
+                {
+                    $table_ipset[$ip] = $ips_hash[$ip];
+                }
+                else // mac lost because user is disconnected
+                {
+                    $table_ipset[$ip] = 0;
+                }
+            }
+
+            //echo 'Machines connected';
+            //var_dump($table_ipset);
+
+            // Destroy connections of clients that are not connected
+            $commands = array();
+            foreach( $table_ipset as $ip => $mac)
+            {
+                if( $mac === 0)
+                {
+                    $commands[] = $IPSET. ' del connections ' . $ip . ' -exist';
+                }
+            }
+
+            // Create connection of clients that have leases
+            foreach( $macs_hash as $mac => $ip)
+            {
+                if( !isset($table_ipset[$ip]))
+                {
+                    $commands[] = $IPSET . ' add connections ' . $ip . ' -exist';
+                    //error_log("Connexion $ip $mac");
+                }
+            }
+
+            #var_dump($commands);
+
+            $this->execCommand( $commands);
+        }
+    }
 
     function checkRules()
     {
@@ -492,6 +616,7 @@ class firewall extends plugable {
     {
 
         $IPTABLES = $this->getFirewallCommand();
+        $IPSET = $this->getIpsetCommand();
         $result = array();
 
 
@@ -500,18 +625,29 @@ class firewall extends plugable {
         $command = $IPTABLES . ' -L BL -n';
         exec($command, $output);
         $result['blacklist'] = count($output) - 2;
-
+        
         // Check WL
         $output = array();
         $command = $IPTABLES . ' -L WL -n';
         exec($command, $output);
         $result['whitelist'] = count($output) - 2;
-      
+
         // Check connexions
-        $output = array();
-        $command = $IPTABLES . ' -L WR_FWD -n';
-        exec($command, $output);
-        $result['connexions'] = count($output) - 2;
+        $CONNECTION_IPSET = getValueFromConf(CF, 'CONNECTION_IPSET');
+        if($CONNECTION_IPSET == 1)
+        {
+            $output = array();
+            $command = $IPSET . ' -L connections -o save';
+            exec($command, $output);
+            #var_dump($output);
+            $result['connexions'] = count($output) - 1;
+        } else {
+            $output = array();
+            $command = $IPTABLES . ' -L WR_FWD -n';
+            exec($command, $output);
+            $result['connexions'] = count($output) - 2;
+        }
+
 
         $result = array_merge($result, $this->foreach_plugins( "connexions"));
 

@@ -60,6 +60,10 @@ class connexion extends plugable {
 
             // Get an array of connected user
             $macs_connected = $this->getConnectedUsers();
+            if( ! in_array(strtoupper($mac), $macs_connected))
+            {
+                error_log( "connection not recorded");
+            }   
 
             // Synchronise firewall on array
             $fw = new firewall();
