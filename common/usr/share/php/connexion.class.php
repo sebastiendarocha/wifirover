@@ -43,9 +43,17 @@ class connexion extends plugable {
     /**
      * \param mac
      * \param $ip
+     * \param date_end
+     * \param lifespan
      */
-    function connectUser($mac,$ip, $get = array()) {
-
+    function connectUser($mac,$ip,$date_end="",$lifespan="", $get = array()) {
+        if ( is_numeric($date_end) ) {
+            $lease_time = $date_end;
+        } elseif (is_numeric($lifespan)) {
+            $lease_time = time() + $lifespan;
+        } else {
+            $lease_time = time() + getValueFromConf($this->cf, 'CTIMEOUT');
+        }
         $this->foreach_plugins( "connectUser", $get);
 
         $was_connected = $this->isUserConnected( $mac);
@@ -54,7 +62,7 @@ class connexion extends plugable {
         {
             // Create a lease
             $this->lockLeaseFile();
-            $lease = time() . '#' . $ip . '#' . strtoupper($mac);
+            $lease = $lease_time . '#' . $ip . '#' . strtoupper($mac);
             file_put_contents( LEASEFILE, $lease.PHP_EOL, FILE_APPEND);
             $this->unlockLeaseFile();
 
@@ -103,7 +111,6 @@ class connexion extends plugable {
      * \param $lease_time connection time
      */
     function disconnectUsers() {
-        $lease_time =getValueFromConf($this->cf, 'CTIMEOUT');
         $new_leases = array();
         $users_disconnected = array();
 
@@ -116,7 +123,7 @@ class connexion extends plugable {
             if($lease != "" )
             {
                 list($time, $ip, $mac) = explode("#", $lease);
-                if( $time + $lease_time > time())
+                if( $time > time())
                 {
                     $new_leases[] = $lease;
                 }
