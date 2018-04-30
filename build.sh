@@ -5,7 +5,8 @@
 DPKGDEB="/usr/bin/dpkg-deb";
 RSYNC="/usr/bin/rsync -a";
 DEST=build_`cat common/etc/version_wr`
-VERSION_WR=$(cat ../wifirover/common/etc/version_wr)
+VERSION_WR=$(cat common/etc/version_wr)
+EXCLUDE_COMMON="--exclude=common/etc/firewall.user"
 
 #Excluding .gitignore files
 EXCLUDE='--exclude=.git';
@@ -45,7 +46,7 @@ echo "Generating LEDE package" > /dev/stderr
 mkdir -p ${DEST}/lede/ipk
 
 # Mergin with common directory
-$RSYNC $EXCLUDE common/* ${DEST}/lede/ipk
+$RSYNC $EXCLUDE $EXCLUDE_COMMON common/* ${DEST}/lede/ipk
 # Adding arch specific files
 $RSYNC $EXCLUDE openwrt/* ${DEST}/lede/ipk
 
@@ -57,13 +58,12 @@ Version: $(cat common/etc/version_wr)
 Description: WifiRover Captive portal
 Section: extras
 Priority: optional
-Maintainer: Olivier Fontes <olivier@altsysnet.com>, Sebastien DA ROCHA <sebastien@altsysnet.com>
+Maintainer: Olivier Fontes <olivier@altsysnet.com>, Sebastien DA ROCHA <sebastien@da-rocha.net>
 License: LGPL 2.1
 Architecture: all
 OE: wifirover
 Source: https://github.com/altsysnet/wifirover
-Depends: firewall, base-files, base-files, php7, dnsmasq-full
-Replaces: firewall, base-files, base-files, php7, dnsmasq-full
+Depends: firewall, php7-cgi, dnsmasq-full
 EOF
 
 cat > $DEST/lede/conffiles << EOF

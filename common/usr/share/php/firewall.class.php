@@ -150,14 +150,14 @@ class firewall extends plugable {
         $rules[] = "$IPTABLES -A INPUT -j ACCEPT -p tcp --dport $GTWPORT -m comment --comment 'HTTP Capture from LAN'";
         $rules[] = "$IPTABLES -A INPUT -j DROP   -p tcp --dport $GTWPORT_SSL -i $WANIF -m comment --comment 'HTTPS DENY FROM WAN'";
         $rules[] = "$IPTABLES -A INPUT -j ACCEPT -p tcp --dport $GTWPORT_SSL -m comment --comment 'HTTPS Capture from LAN'";
-        $rules[] = "$IPTABLES -I INPUT -p tcp --dport $GTWPORT_SSL -i $LANIF -m state --state NEW -m recent --set -m comment --comment 'Protect local HTTPS'";
-        $rules[] = "$IPTABLES -I INPUT -p tcp --dport $GTWPORT_SSL -i $LANIF -m state --state NEW -m recent --update --seconds 5 --hitcount 1 -j DROP -m comment --comment 'Protect local HTTPS'";
-        $rules[] = "$IPTABLES -I INPUT -j ACCEPT -m state --state ESTABLISHED,RELATED";
+        $rules[] = "$IPTABLES -I INPUT -p tcp --dport $GTWPORT_SSL -i $LANIF ".$this->getStateModule()." NEW -m recent --set -m comment --comment 'Protect local HTTPS'";
+        $rules[] = "$IPTABLES -I INPUT -p tcp --dport $GTWPORT_SSL -i $LANIF ".$this->getStateModule()." NEW -m recent --update --seconds 5 --hitcount 1 -j DROP -m comment --comment 'Protect local HTTPS'";
+        $rules[] = "$IPTABLES -I INPUT -j ACCEPT ".$this->getStateModule()." ESTABLISHED,RELATED";
 
         // Open Standard Access
         $rules[] = "$IPTABLES -A FORWARD -d $IPPORTAL -p tcp --dport 80 -j ACCEPT";
         $rules[] = "$IPTABLES -A FORWARD -d $IPPORTAL -p tcp --dport 443 -j ACCEPT";
-        $rules[] = "$IPTABLES -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT";
+        $rules[] = "$IPTABLES -A FORWARD ".$this->getStateModule()." ESTABLISHED,RELATED -j ACCEPT";
         $rules[] = "$IPTABLES -t nat -A POSTROUTING -o $WANIF -j MASQUERADE";
 
         // Open access from corporate
@@ -276,7 +276,6 @@ class firewall extends plugable {
                     exec( "$IPTABLES -S -t nat", $out);
                 }
                 error_log( $rule);
-                error_log( print_r($out,true));
             }
         }
     }
@@ -319,7 +318,7 @@ class firewall extends plugable {
             "$IPTABLES -P OUTPUT ACCEPT",
             "$IPTABLES -P FORWARD DROP",
 
-            "$IPTABLES -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT",
+            "$IPTABLES -A FORWARD ".$this->getStateModule()." ESTABLISHED,RELATED -j ACCEPT",
         ));
 
         @exec( "$IPSET list connections 2> /dev/null", $output, $err);
@@ -791,6 +790,28 @@ class firewall extends plugable {
 
 
         $this->execCommand( $commands);
+    }
+
+    function getStateModule($matches_file = '/proc/net/ip_tables_matches')
+    {
+        $names = array();
+        if( file_exists('/etc/debian_version')) { // Debian
+            $command = '/usr/bin/sudo cat ' . $matches_file;
+            exec($command, $names);
+        } else { // Openwrt
+            $names = file($matches_file,FILE_IGNORE_NEW_LINES);
+        }
+
+        if( in_array("conntrack", $names))
+        {
+            $result = "-m conntrack --ctstate";
+        }
+        else
+        {
+            $result = "-m state --state";
+        }
+        return $result;
+
     }
 
 }
