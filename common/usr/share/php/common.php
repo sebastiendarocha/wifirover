@@ -266,3 +266,9 @@ function getRealNagiosName($name, $mac="") {
     return $result;
 }
 
+function  ping( $ip) {
+    $out = array();
+    exec("ping -c 1 -w 1 -q $ip", $out, $err);
+    return $err == 0;
+}
+
