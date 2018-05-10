@@ -1,6 +1,7 @@
 #!/bin/bash
 
-if [[ "$(pgrep lighttpd)" -eq 0 ]] ; then
+pgrep lighttpd > /dev/null
+if [[ "$?" -ne 0 ]] ; then
     logger wr_watchdog : starting lighttpd
     /etc/init.d/lighttpd start
 fi
