@@ -267,8 +267,15 @@ function getRealNagiosName($name, $mac="") {
 }
 
 function  ping( $ip) {
-    $out = array();
-    exec("ping -c 1 -w 1 -q $ip", $out, $err);
+    if( $ip != "")
+    {
+        $out = array();
+        exec("ping -c 1 -w 1 -q $ip", $out, $err);
+    }
+    else
+    {
+        $err = 1;
+    }
     return $err == 0;
 }
 
