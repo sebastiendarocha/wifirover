@@ -34,7 +34,7 @@ $RSYNC $EXCLUDE common/* ${DEST}/wifirover_edgerouter
 # Adding OS specific files
 $RSYNC $EXCLUDE edgerouter/* ${DEST}/wifirover_edgerouter
 # Building EdgeOS package
-$DPKGDEB --build ${DEST}/wifirover_edgerouter
+$DPKGDEB -Z gzip --build ${DEST}/wifirover_edgerouter
 
 
 rm -rf $DEST/wifirover_debian $DEST/wifirover_edgerouter
