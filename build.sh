@@ -17,6 +17,9 @@ done
 # Cleaning tmp files
 rm -rf ${DEST}
 
+sed -i "s/Version:.*/Version: $VERSION_WR/" debian/DEBIAN/control
+sed -i "s/Version:.*/Version: $VERSION_WR/" edgerouter/DEBIAN/control
+
 echo "Generating Debian packages" > /dev/stderr
 # Export of Debian tree
 mkdir -p ${DEST}/wifirover_debian ${DEST}/wifirover_edgerouter
