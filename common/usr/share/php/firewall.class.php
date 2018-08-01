@@ -77,7 +77,7 @@ class firewall extends plugable {
 
         // Weblib: authorize to connect to 443 on the router
         $portalmode = getValueFromConf("/etc/wifi_rover.conf", 'PORTALMODE');
-        if( $portalmode == "WEBLIB")
+        if( $portalmode == "WEBLIB" or $portalmode == "CLOUDWEBLIB")
         {
             $rules[] = "$IPTABLES -t nat -A PREROUTING -i $LANIF -p tcp --dport 443 -d $GTW -j ACCEPT";
             $rules[] = "$IPTABLES -A INPUT -j ACCEPT -i $LANIF -p tcp --dport 443 -m comment --comment 'Interface Web LAN'";
