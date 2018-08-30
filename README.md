@@ -10,7 +10,7 @@ The following packages are required:
 * zlib1g-dev
 
 
-# LEDE packages required:
+# LEDE/OpenWRT packages required:
 * iptables-mod-conntrack-extra
 * zoneinfo-core
 * zoneinfo-europe
@@ -24,3 +24,22 @@ The following packages are required:
 * bash
 * dnsmasq or dnsmasq-full (for whitelist domains)
 * wireless-tools
+
+# Running unit tests on docker
+
+## Prepare
+
+You need docker and docker-compose
+
+You have to create 2 networks:
+
+```
+docker network create --subnet 192.168.22.0/24 lan
+docker network create --subnet 192.168.32.0/24 corporate
+```
+
+## Running test
+
+```
+docker-compose up --build wifirover
+```
