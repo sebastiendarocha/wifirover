@@ -8,7 +8,7 @@ MAINTAINER "Sébastien DA ROCHA" <sebastien@altsysnet.com>
 ENV DEBIAN_FRONTEND noninteractive
 RUN (apt-get update && apt-get upgrade -y -q && apt-get -y -q autoremove)
 
-RUN apt-get install -y lighttpd php5-cgi dnsmasq vim sudo dnsutils openvpn iptables ipset net-tools
+RUN apt update -y ; apt-get install -y lighttpd php5-cgi dnsmasq vim sudo dnsutils openvpn iptables ipset net-tools
 RUN apt-get install -y phpunit
 
 COPY common/ /

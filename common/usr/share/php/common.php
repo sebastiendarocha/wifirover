@@ -201,7 +201,43 @@ function getIPFrontal()
 
 function isIPwithPort($var)
 {
-    return preg_match('/^([0-1]{0,1}[0-9]{1,2}\.|[2]{1}[0-5]{2}\.){3}([0-1]{0,1}[0-9]{1,2}|[2]{1}(5[0-5]|[0-4][0-9])):([0-5]{0,1}[0-9]{1,4}|6[0-5]{2}[0-3][0-5])$/', $var);
+    $result = False;
+
+    $vars = explode(":", $var);
+    if( count($vars) == 2)
+    {
+        list($ip, $port) = $vars;
+        $ip_bytes = explode(".", $ip);
+#        print_r($ip_bytes);
+#        print("port : " . $port . PHP_EOL);
+#        print( 'count($ip_bytes) :' . count($ip_bytes) . PHP_EOL);
+        if( count($ip_bytes) == 4)
+        {
+#            print( '$ip_bytes is int :' .
+#                is_numeric($ip_bytes[0]) . " " .
+#                is_numeric($ip_bytes[1]) . " " .
+#                is_numeric($ip_bytes[2]) . " " .
+#                is_numeric($ip_bytes[3]) . PHP_EOL);
+            if ( is_numeric($ip_bytes[0])
+                 and is_numeric($ip_bytes[1])
+                 and is_numeric($ip_bytes[2])
+                 and is_numeric($ip_bytes[3])
+                 and is_numeric($port)
+            )
+            {
+                if ( $ip_bytes[0] >= 0 and $ip_bytes[0] < 256
+                     and $ip_bytes[1] >= 0 and $ip_bytes[1] < 256
+                     and $ip_bytes[2] >= 0 and $ip_bytes[2] < 256
+                     and $ip_bytes[3] >= 0 and $ip_bytes[3] < 256
+                     and $port >= 0 and $port < 65536
+                )
+                {
+                    $result = True;
+                }
+            }
+        }
+    }
+    return $result;
 }
 
 function getBorneMac() {
